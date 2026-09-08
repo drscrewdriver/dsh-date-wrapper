@@ -1,15 +1,26 @@
 # dsh-date-wrapper
 
-> 精简版时间注入：把 `Current date: 2026-09-08 Asia/Shanghai Tuesday`（46 字符 ≈ 12 token）挂进 DSH 自带的运行上下文快照。
-> 不加载 `@deepseek-ai/dsh-time-context`，不产生额外会话消息，不改 DSH 源码，不提 PR。
-
-- [中文 README](./README.md)
+- [English README](./README.md)
+- [中文 README](./README.zh.md)
+- [日本語 README](./README.ja.md)
+- [한국어 README](./README.ko.md)
+- [Installation guide](./INSTALL.md)
 - [中文安装指南](./INSTALL.zh.md)
-- [机制详解：DSH 会话、JSONL 与请求组装](./docs/dsh-session-and-context-mechanics.md)
+- [日本語インストールガイド](./INSTALL.ja.md)
+- [한국어 설치 안내](./INSTALL.ko.md)
+- [Changelog](./CHANGELOG.md)
+- [日本語 changelog](./CHANGELOG.ja.md)
+- [한국어 changelog](./CHANGELOG.ko.md)
 
-## 这个插件解决什么
+> A minimal date line: it hangs `Current date: 2026-09-08 Asia/Shanghai Tuesday` (46 characters, ~12 tokens) onto the runtime-context snapshot DSH already sends.
+> It does **not** load `@deepseek-ai/dsh-time-context`, does **not** add extra session messages, does **not** patch DSH source, and needs no PR.
 
-DSH 自带的 `@deepseek-ai/dsh-time-context` 每次请求注入约 **280 字符**的元数据：
+- [How it works: DSH sessions, JSONL and request assembly](./docs/dsh-session-and-context-mechanics.md) (Chinese)
+- [HANDOVER.md](./HANDOVER.md) (Chinese)
+
+## What this plugin solves
+
+DSH's own `@deepseek-ai/dsh-time-context` injects about **280 characters** of metadata on every request:
 
 ```
 Time sampled while preparing turn 3, step 2: 2026-09-08T16:05:36+08:00[Asia/Shanghai]
@@ -17,161 +28,184 @@ Browser time zone for this request: Asia/Shanghai. Interpret otherwise-unqualifi
 Elapsed since the preceding model-visible message: 2m 34s.
 ```
 
-本插件把同样的信息压成一行 **46 字符**，并且换了一个落点 —— 不再往消息流里塞：
+This plugin compresses the same information into a single **46-character** line and moves where it lands — it no longer goes into the message stream:
 
 ```
 Current date: 2026-09-08 Asia/Shanghai Tuesday
 ```
 
-| 维度 | `dsh-time-context` | `dsh-date-wrapper` |
-|------|--------------------|--------------------|
-| 注入文本 | ~280 字符 | 46 字符（↓84%），约 12 token |
-| 落点 | 每条 pre-step 消息（`user/message`） | 平台运行上下文快照（`systemPrompt.context`） |
-| 频率 | 每个 eligible step 一条 | 文本变化时随快照重发（同一天内 0 条） |
-| 依赖 | `agents` 服务 | `systemPrompt` 服务 |
-| 运行时依赖 | — | 零 |
+| Dimension | `dsh-time-context` | `dsh-date-wrapper` |
+|-----------|--------------------|--------------------|
+| Injected text | ~280 characters | 46 characters (↓84%), ~12 tokens |
+| Landing point | One message per pre-step (`user/message`) | The platform runtime-context snapshot (`systemPrompt.context`) |
+| Frequency | One event per eligible step | Re-sent with the snapshot only when the text changes (0 events within a day) |
+| Dependency | `agents` service | `systemPrompt` service |
+| Runtime dependencies | — | none |
 
-## 为什么用运行上下文快照，而不是消息
+## Version compatibility
 
-最初的做法是学 `dsh-time-context`，在 `agent/pre-step` 里追加一条 `user/message`。实测下来太贵：每条 JSONL 事件 **339 字节**（文本只占 46 字节，`content` 与 `sections` 各存一份），而它**每轮**都会写一条。
+| Item | Verdict |
+|------|---------|
+| Target DSH versions | 0.1.0-rc.7 → 0.1.3-alpha.2 (contract stable, see the table below) |
+| settings API | **Not applicable**: the plugin registers no settings and exports no schemastery `Config` |
+| Contract points used | Exactly one — `systemPrompt.context()` |
+| Conflict with a native feature | Overlaps `@deepseek-ai/dsh-time-context`; **do not use both**. Not installed by default = off by default |
+| Browser half | **None**: no slot, no DOM, no CSS semantic tokens |
+| DSH package imports | **Zero**: nothing from `@deepseek-ai/*`, which is stricter than the "runtime detection + dual API fallback" pattern |
 
-改成注册运行上下文后，日期并入平台本来就有的那条快照消息：
+| Contract point | 0.1.0-rc.7 | 0.1.1-rc.2 | 0.1.2-rc.1 | 0.1.3-alpha.2 |
+|---|---|---|---|---|
+| `systemPrompt.context(ctx): () => void` | yes | yes (verified on this host) | yes | yes |
+| `PromptContext = { name, order, text }`, no `complete` field | yes | yes | yes | yes |
+| `includeRuntimeContext` / `suppressRuntimeContext` | yes | yes | yes | yes |
+| agent-loop `project()` text dedupe and `surfaceOp: "append"` | yes | yes | yes | not compared |
 
-- 平台对快照**按文本去重**（`dsh-agent-loop` 的 `RuntimeContextProjection.project()`：`if (this.retained?.text === snapshot) return`），所以日期不变时**一条事件都不多**；
-- 快照是**追加**新消息（`surfaceOp: 'append'`），不是原地改写，请求序列只增长 → **不破坏前缀缓存**；
-- 我们的边际成本只有那 46 字节，且只在快照因文本变化而重发时才被带上。
+> Method: `npm pack @deepseek-ai/dsh-system-prompt@<version>`, unpack, and compare `lib/types/index.d.ts` and `lib/index.js`; the same for `@deepseek-ai/dsh-agent-loop`.
+> Only 0.1.1-rc.2 has been verified **at runtime** on this host; runtime verification on 0.1.2-rc.1 / 0.1.3-alpha.2 is still pending (see `HANDOVER.md` §7).
 
-本机实测（一个 10 轮 / 231 步的真实会话）：
+## Why a runtime-context snapshot instead of a message
 
-| 项 | 实测 |
-|----|------|
-| 平台运行上下文快照 | 2 条，1133 B/条，共 2.3 KB |
-| 真实用户消息 | 10 条，396 B/条 |
-| 旧做法（每轮一条消息） | 10 条 × 339 B ≈ 3.4 KB |
-| 本做法增量 | 0 条额外事件，日期约 46 B 并入已有快照 |
+The first attempt copied `dsh-time-context` and appended a `user/message` in `agent/pre-step`. Measured cost was too high: each JSONL event is **339 bytes** (the text is only 46 of them, because `content` and `sections` each store a copy) and it wrote one **every turn**.
 
-## 配置
+Registering a runtime context instead folds the date into the snapshot message the platform already sends:
 
-`cordis.patch.yml` 里随行下发，改完需重启：
+- The platform **deduplicates snapshots by text** (`RuntimeContextProjection.project()` in `dsh-agent-loop`: `if (this.retained?.text === snapshot) return`), so while the date is unchanged **not a single extra event is written**;
+- Snapshots **append** a new message (`surfaceOp: 'append'`) rather than rewriting in place, so the request sequence only grows → **the prefix cache is preserved**;
+- Our marginal cost is those 46 bytes, and only when the snapshot is re-sent because its text changed.
+
+Measured on this host (one real session, 10 turns / 231 steps):
+
+| Item | Measured |
+|------|----------|
+| Platform runtime-context snapshots | 2 events, 1133 B each, 2.3 KB total |
+| Real user messages | 10 events, 396 B each |
+| Old approach (one message per turn) | 10 × 339 B ≈ 3.4 KB |
+| This approach | 0 extra events; ~46 B folded into an existing snapshot |
+
+## Configuration
+
+Shipped with `cordis.patch.yml`; restart after changing it:
 
 ```yaml
 - insert:
     - id: date-wrapper
       name: dsh-date-wrapper
       config:
-        timeZone: Asia/Shanghai   # IANA 时区；缺省用进程时区
+        timeZone: Asia/Shanghai   # IANA zone; omit to use the process zone
 ```
 
-- `timeZone` 非法会在启动时直接抛错（**不**静默降级成 UTC）。
-- 文本里的时区名就是解析后的 IANA 名（`timeZone` 缺省时取进程时区名）。
-- 运行上下文条目的名字是 `date-wrapper:date`，排序位 `116`（已占用：110 sandbox、115 approval、120 subagent）。
+- An invalid `timeZone` throws at startup (**no** silent fallback to UTC).
+- The zone name in the text is the resolved IANA name (the process zone name when `timeZone` is omitted).
+- The runtime-context entry is named `date-wrapper:date` with order `116` (already taken: 110 sandbox, 115 approval, 120 subagent).
+- The plugin exports **no schemastery `Config`**, so its config skips the host schema validation; everything is validated by hand in `validateConfig()`. That is also why the Settings → Plugins page has no config form for it.
 
-## 开关：靠插件激活，没有面板开关
+## On/off: the plugin's activation is the switch, there is no panel toggle
 
-本插件**不提供**设置面板开关，也**没有** `enabled` 之类的 config 字段。原因：
+The plugin ships **no** settings-panel toggle and **no** `enabled` config field, because:
 
-- 功能开关 = **插件行是否激活**。插件未激活 → `apply()` 不跑 → 运行上下文条目不存在 → 一个字都不会注入。
-- 本插件没有 client 半（无 `dsh.client`），界面上没有任何属于它的控件。
-- DSH 自带的 **设置 → 插件** 页面已经会显示每个条目的 `已启用 / 已停用`（只读，不能点）。
+- The feature switch *is* whether the plugin row is active. Inactive → `apply()` never runs → the runtime-context entry does not exist → not a single character is injected.
+- There is no browser half (`dsh.client`), so the UI owns no widget of ours.
+- DSH's built-in **Settings → Plugins** page already shows each entry as `enabled / disabled` (read-only).
 
-### 怎么关
+### How to turn it off
 
-在**你自己的** profile patch 层里按 `id` 覆盖即可 —— `C:\Users\<你>\.dsh\profiles\web\cordis.patch.yml`：
+Override it by `id` in **your own** profile patch layer — `C:\Users\<you>\.dsh\profiles\web\cordis.patch.yml`:
 
 ```yaml
 - id: date-wrapper
-  disabled: true    # 停用；改回 false 即恢复
+  disabled: true    # disabled; set back to false to restore
 ```
 
-- **热生效，无需重启**：该文件被 Cordis HMR 监听，`disabled: true` 会直接 `dispose` 该行的 fiber。
-- 若 `date-wrapper` 行还不存在（未安装），这条 patch 只会打一条 `entry "date-wrapper" not found` 警告，不会让启动失败。
-- ⚠️ 该文件必须是**顶层 YAML 数组**；写坏了会**启动失败**（DSH 对用户 patch 层是 fail-loud）。
+- **Hot, no restart**: that file is watched by Cordis HMR, and `disabled: true` disposes the row's fiber directly.
+- If the `date-wrapper` row does not exist yet (not installed), this patch only logs an `entry "date-wrapper" not found` warning; startup still succeeds.
+- ⚠️ The file must be a **top-level YAML array**; if it is malformed, **startup fails** (DSH is fail-loud for user patch layers).
 
-### 怎么彻底移除
+### How to remove it completely
 
 ```bash
 dsh plugin --profile web remove dsh-date-wrapper
 ```
 
-卸载走 bundle 层，**需要重启** dsh web 才生效（bundle patch 不热重载）。
+Removal goes through the bundle layer and **requires a restart** of dsh web (bundle patches are not hot-reloaded).
 
-## 安装
+## Install
 
 ```bash
 dsh plugin --profile web add E:\test\rewrite-agently\mine-dsh-plugins\dsh-date-wrapper
 ```
 
-重启 dsh web 并刷新页面。详见 [INSTALL.zh.md](./INSTALL.zh.md)。
+Restart dsh web and refresh the page. See [INSTALL.md](./INSTALL.md).
 
-## 验证
+## Verification
 
-| # | 怎么验证 | 期望 |
-|---|----------|------|
-| A1 | 新开一个会话，发一句话 | 运行上下文快照里出现 `Current date: YYYY-MM-DD <时区> <星期>`（会话里显示为一条注入上下文行，来源含 `system-prompt`） |
-| A2 | 看该行文本 | ≤50 字符（实测 46；PRD 原阈值 30，因用户指定格式放宽） |
-| A3 | 停用插件（profile patch 置 `disabled: true`） | 后续会话快照里不再出现该行 |
-| A4 | 搜索会话日志 | 没有 `Time sampled` / `Elapsed since` / `Browser time zone` |
-| A5 | 把 `timeZone` 改成 `UTC` 并重启 | 日期按 UTC 计算（跨时区边界会差一天） |
+| # | How | Expected |
+|---|-----|----------|
+| A1 | Open a new session and send one message | The runtime-context snapshot contains `Current date: YYYY-MM-DD <zone> <weekday>` (shown as an injected context row sourced from `system-prompt`) |
+| A2 | Check that line | ≤50 characters (46 measured; the PRD threshold of 30 was relaxed for the requested format) |
+| A3 | Disable the plugin (profile patch `disabled: true`) | The line no longer appears in later sessions' snapshots |
+| A4 | Search the session log | No `Time sampled` / `Elapsed since` / `Browser time zone` |
+| A5 | Set `timeZone` to `UTC` and restart | The date follows UTC (may differ by one day across zone boundaries) |
 
-## 实现要点
+## Implementation notes
 
 ```
 dsh-date-wrapper/
 ├── package.json          # name / type: module / main / exports["."] / dsh.bundle.patch / files
-├── cordis.patch.yml      # 一行 insert（无 patch 级 id → 落在 profile 根 = 宿主面）
+├── cordis.patch.yml      # one insert row (no patch-level id → lands at the profile root = host plane)
 ├── src/
-│   ├── format.js         # 纯函数：resolveZone / renderDate / createDateContextText / validateConfig / TEXT_LABEL
+│   ├── format.js         # pure functions: resolveZone / renderDate / createDateContextText / validateConfig / TEXT_LABEL
 │   └── index.js          # apply(ctx, config) → ctx.inject(['systemPrompt'], …) → systemPrompt.context(...)
 └── tests/
-    ├── format.test.mjs   # 11 项（时区投影、星期、格式与长度、降级、配置校验）
-    └── context.test.mjs  # 7 项（伪 ctx 断言注册契约）
+    ├── format.test.mjs   # 11 cases (zone projection, weekday, format and length, degradation, config validation)
+    └── context.test.mjs  # 7 cases (registration contract against a fake ctx)
 ```
 
-- **宿主面行**：`ctx.inject(['systemPrompt'], …)` 建立子 fiber；服务缺失时静默不注册，而不是让整个 boot 失败。
-- **fail-soft 的文本 provider**：prompt 组装期抛错会让**每一次请求**都失败，所以渲染失败时返回空串（平台会过滤掉空文本）。
-- **不设 `complete`**：设了会顶掉整份系统提示词。
-- **去重交给平台**：不维护任何 per-agent 状态，跨天时快照自动带上新日期。
-- **生命周期**：注册归属 `ctx.inject` 的子 fiber，插件停用时随 fiber 回收。
+- **Host-plane row**: `ctx.inject(['systemPrompt'], …)` opens a child fiber; if the service is missing, the plugin silently registers nothing instead of failing the whole boot.
+- **Fail-soft text provider**: throwing during prompt assembly would fail **every** request, so a render failure returns an empty string (the platform filters empty text out).
+- **No `complete`**: setting it would shadow the entire system prompt.
+- **Deduplication is the platform's job**: no per-agent state is kept; across midnight the snapshot simply carries the new date.
+- **Lifecycle**: the registration belongs to the `ctx.inject` child fiber and is reclaimed when the plugin is deactivated.
 
-## 开发：TDD + lint
+## Development: TDD + lint
 
 ```bash
-npm install          # 只装 devDependencies（eslint / @eslint/js），运行时零依赖
+npm install          # devDependencies only (eslint / @eslint/js); zero runtime dependencies
 
-npm run tdd          # 监听模式：改 src/ 或 tests/ 自动重跑（node --test --watch）
-npm test             # 单次全量：node --test "tests/*.test.mjs"
-node tests/format.test.mjs   # 单文件直接跑（沙箱里最稳，不派生子进程）
+npm run tdd          # watch mode: rerun on src/ or tests/ changes (node --test --watch)
+npm test             # one full run: node --test "tests/*.test.mjs"
+node tests/format.test.mjs   # run a single file (most reliable under a sandbox: no child process)
 
-npm run lint         # eslint .（src + tests + eslint.config.mjs）
-npm run lint:fix     # 自动修可修的
-npm run verify       # lint + test，提交前跑这一条
+npm run lint         # eslint . (src + tests + eslint.config.mjs)
+npm run lint:fix     # auto-fix what can be fixed
+npm run verify       # lint + test; run this before committing
 ```
 
-### 红-绿-重构
+### Red-green-refactor
 
-测试用例直接对应验收项，流程是「先写一条会红的断言，再让它变绿」：
+Test cases map directly to acceptance criteria: write a failing assertion first, then make it pass.
 
-| 步骤 | 动作 | 命令 |
-|------|------|------|
-| 1 红 | 在 `tests/*.test.mjs` 里写一条按验收项命名的断言，断言当前行为**不满足**的期望 | `npm run tdd` |
-| 2 绿 | 在 `src/` 里写最小实现让它通过，不动其它断言 | `npm run tdd` |
-| 3 重构 | 保持全绿的前提下整理命名/抽纯函数；`src/format.js` 承担全部纯逻辑，`src/index.js` 只做注册 | `npm run tdd` |
-| 4 闸门 | 提交前跑 lint + 全量测试 | `npm run verify` |
+| Step | Action | Command |
+|------|--------|---------|
+| 1 red | Add an assertion in `tests/*.test.mjs` named after the acceptance criterion, asserting the behaviour you do **not** have yet | `npm run tdd` |
+| 2 green | Write the minimal implementation in `src/` to pass it without touching other assertions | `npm run tdd` |
+| 3 refactor | Rename and extract pure functions while staying green; `src/format.js` holds all pure logic, `src/index.js` only registers | `npm run tdd` |
+| 4 gate | Run lint + the full suite before committing | `npm run verify` |
 
-现有 18 条断言：`format.test.mjs`（11 条）覆盖纯函数，`context.test.mjs`（7 条）用伪 ctx 断言注册契约。
+18 assertions today: `format.test.mjs` (11) covers the pure functions, `context.test.mjs` (7) asserts the registration contract against a fake ctx.
 
-### lint 配置要点
+### Lint configuration highlights
 
-- ESLint 10 扁平配置（`eslint.config.mjs`），`@eslint/js` recommended 为基线。
-- 收紧项：`eqeqeq`、`prefer-const`、`object-shorthand`、`no-unused-vars`（`_` 前缀豁免）。
-- 显式声明 Node 全局 `crypto` / `console` / `process`，否则 `no-undef` 会误报。
+- ESLint 10 flat config (`eslint.config.mjs`) with `@eslint/js` recommended as the baseline.
+- Tightened rules: `eqeqeq`, `prefer-const`, `object-shorthand`, `no-unused-vars` (`_` prefix exempt).
+- Node globals `crypto` / `console` / `process` are declared explicitly, otherwise `no-undef` false-positives.
 
-## 已知限制
+## Known limitations
 
-- **fixed-prompt preset 下不生效**：若某个 preset 的 persona 设了 `includeRuntimeContext: false`（官方 `minimal` 与本地 `simple-reply` 都是），`assemble()` 会返回 `contexts: []`，本插件的条目会被整段丢掉。这类 preset 的设计意图就是「不允许后续 listener 往提示词里加东西」。
-- **旧快照会留在历史里**：日期变化时平台追加一条新快照（旧快照保留），靠快照自带的 "This snapshot supersedes earlier runtime-context snapshots" 声明让最新一条生效 —— 这与平台处理 cwd / sandbox / approval 策略变化的方式一致。
-- **bundle patch 不热重载**：改 `cordis.patch.yml` 或升级插件后必须重启 dsh web（改 profile patch 的 `disabled` 是热生效的）。
-- **不加载也不过滤 `dsh-time-context`**：若你在某个 preset 里显式挂载它，它的 verbose 文本会照常出现。不要同时使用。
+- **Inactive under fixed-prompt presets**: if a preset's persona sets `includeRuntimeContext: false` (the official `minimal` and the local `simple-reply` both do), `assemble()` returns `contexts: []` and this plugin's entry is dropped wholesale. Those presets are designed to forbid later listeners from adding anything to the prompt.
+- **Old snapshots stay in history**: when the date changes the platform appends a new snapshot (the old one is kept) and the new one takes effect through its own "This snapshot supersedes earlier runtime-context snapshots" declaration — the same way the platform handles cwd / sandbox / approval policy changes.
+- **Bundle patches are not hot-reloaded**: changing `cordis.patch.yml` or upgrading the plugin requires a dsh web restart (changing `disabled` in the profile patch is hot).
+- **`dsh-time-context` is neither loaded nor filtered**: if you mount it explicitly in a preset, its verbose text appears as usual. Do not use both.
+- **No runtime probe for the contract point**: `systemPrompt.context` is called unguarded, so a future DSH rename would surface as a plugin load failure instead of a silent degradation (see `HANDOVER.md` §7).
 
 ## License
 
