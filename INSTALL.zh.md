@@ -22,18 +22,25 @@ pnpm --version          # dsh plugin 是 pnpm 转发器，pnpm 必须在 PATH �
 
 ## 1. 安装
 
-用**绝对路径**（推荐，路径原样传给 pnpm）：
+从 GitHub 安装（推荐：pnpm 把包拷进 `node_modules`，lockfile 钉住具体 commit）：
+
+```powershell
+dsh plugin --profile web add github:drscrewdriver/dsh-date-wrapper
+```
+
+或从本地目录安装（开发期）：
 
 ```powershell
 dsh plugin --profile web add E:\test\rewrite-agently\mine-dsh-plugins\dsh-date-wrapper
 ```
 
-或开发期用软链（改源码立即生效，无需重装）：
+或软链模式（改源码后重启即生效，无需重装）：
 
 ```powershell
 dsh plugin --profile web add link:E:\test\rewrite-agently\mine-dsh-plugins\dsh-date-wrapper
 ```
 
+> ⚠️ 本地 `file:` / `link:` 安装会让 profile 依赖那个路径。一旦目录被改名或删除，profile 里**任何** pnpm 操作都会 `ENOENT`，直到把这条失效依赖移除 —— 本包从 `dsh-time-wrapper` 改名时就是这样炸的。
 > ⚠️ 相对路径只有以 `.` 或 `..` 开头才会被锚定到**你当前所在目录**；
 > 写成 `mine-dsh-plugins\dsh-date-wrapper` 会在 profile 目录里找不到。用绝对路径最稳。
 
@@ -83,6 +90,7 @@ node tests/context.test.mjs
 | 某些 preset 下没有日期 | 该 preset 的 persona 设了 `includeRuntimeContext: false`（官方 `minimal`、本地 `simple-reply` 都是）。这类 preset 明确禁止后续 listener 往提示词加内容，本插件的运行上下文会被丢掉 —— 属预期行为 |
 | 日期差一天 | `timeZone` 与你的实际时区不一致；跨时区边界（如北京 00:30 = UTC 前一日 16:30）会表现为差一天 |
 | 同时看到 `Time sampled …` | 某个 preset 里显式挂载了 `@deepseek-ai/dsh-time-context`。本插件不加载也不过滤它，两者不该同时使用 |
+| profile 里任何 pnpm 操作都报 `ENOENT: no such file or directory, open '…'` | 有一条 `file:` / `link:` 依赖指向已不存在的路径（包被改名，或它的 tarball 被删）。先 `dsh plugin --profile web remove <名字>` 移除失效依赖，再重新安装；`github:` 安装没有这个失败模式 |
 
 ## 5. 开关（不装面板开关，靠插件激活）
 

@@ -22,18 +22,25 @@ pnpm --version          # `dsh plugin` is a pnpm forwarder, so pnpm must be on P
 
 ## 1. インストール
 
-**絶対パス**を使用してください（推奨 — パスはそのまま pnpm に転送されます）:
+**GitHub からインストール**することを推奨します（pnpm がパッケージを `node_modules` にコピーし、lockfile が正確なコミットを固定します）:
+
+```powershell
+dsh plugin --profile web add github:drscrewdriver/dsh-date-wrapper
+```
+
+またはローカルディレクトリから（開発時）:
 
 ```powershell
 dsh plugin --profile web add E:\test\rewrite-agently\mine-dsh-plugins\dsh-date-wrapper
 ```
 
-または開発中はリンクモードで（ソースの編集が即座に反映され、再インストールは不要）:
+またはリンクモード（ソースの編集は再起動後に反映され、再インストールは不要）:
 
 ```powershell
 dsh plugin --profile web add link:E:\test\rewrite-agently\mine-dsh-plugins\dsh-date-wrapper
 ```
 
+> ⚠️ ローカルの `file:` / `link:` インストールはプロファイルをそのパスに依存させます。ディレクトリが改名・削除されると、失効した依存を削除するまでプロファイル内の**あらゆる** pnpm 操作が `ENOENT` で失敗します —— 本パッケージが `dsh-time-wrapper` から改名されたときに実際に起きたことです。
 > ⚠️ 相対パスが**現在のディレクトリ**を基準に解決されるのは、`.` または `..` で始まる場合だけです。
 > `mine-dsh-plugins\dsh-date-wrapper` はプロファイルディレクトリ内で解決されるため見つかりません。絶対パスが最も安全です。
 
@@ -83,6 +90,7 @@ node tests/context.test.mjs
 | 一部のプリセットで日付が出ない | そのプリセットのペルソナが `includeRuntimeContext: false` を設定しています（公式の `minimal` とローカルの `simple-reply` の両方がそう）。このようなプリセットは、後続のリスナーがプロンプト内容を追加することを明示的に禁止しているため、このプラグインのランタイムコンテキストは破棄されます — 想定どおりの挙動です |
 | 日付が 1 日ずれる | `timeZone` が実際のゾーンと一致していません。ゾーン境界をまたぐと（例: 北京時間 00:30 = 前日 16:30 UTC）1 日の差として現れます |
 | `Time sampled …` も表示される | 何らかのプリセットが `@deepseek-ai/dsh-time-context` を明示的にマウントしています。このプラグインはそれを読み込まず、フィルタもしません。両者は併用すべきではありません |
+| プロファイル内のあらゆる pnpm 操作が `ENOENT: no such file or directory, open '…'` で失敗する | `file:` / `link:` 依存が存在しないパスを指しています（パッケージの改名、または tarball の削除）。まず `dsh plugin --profile web remove <名前>` で失効した依存を削除し、再インストールしてください。`github:` インストールにはこの失敗モードがありません |
 
 ## 5. オン/オフ（パネルのトグルなし — 有効化そのものがスイッチ）
 

@@ -131,10 +131,10 @@ dsh plugin --profile web remove dsh-date-wrapper
 ## インストール
 
 ```bash
-dsh plugin --profile web add E:\test\rewrite-agently\mine-dsh-plugins\dsh-date-wrapper
+dsh plugin --profile web add github:drscrewdriver/dsh-date-wrapper
 ```
 
-dsh web を再起動し、ページを更新してください。詳しくは [INSTALL.md](./INSTALL.md) を参照してください。
+dsh web を再起動し、ページを更新してください。ローカルパス / リンクモード / トラブルシューティングは [INSTALL.ja.md](./INSTALL.ja.md) を参照してください。
 
 ## 検証
 

@@ -131,10 +131,10 @@ Removal goes through the bundle layer and **requires a restart** of dsh web (bun
 ## Install
 
 ```bash
-dsh plugin --profile web add E:\test\rewrite-agently\mine-dsh-plugins\dsh-date-wrapper
+dsh plugin --profile web add github:drscrewdriver/dsh-date-wrapper
 ```
 
-Restart dsh web and refresh the page. See [INSTALL.md](./INSTALL.md).
+Restart dsh web and refresh the page. Local paths, link mode and troubleshooting: [INSTALL.md](./INSTALL.md).
 
 ## Verification
 

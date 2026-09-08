@@ -22,18 +22,25 @@ pnpm --version          # `dsh plugin` is a pnpm forwarder, so pnpm must be on P
 
 ## 1. Install
 
-Use an **absolute path** (recommended — the path is forwarded to pnpm verbatim):
+From GitHub (recommended — pnpm copies the package into `node_modules`, and the lockfile pins the exact commit):
+
+```powershell
+dsh plugin --profile web add github:drscrewdriver/dsh-date-wrapper
+```
+
+Or from a local checkout (development):
 
 ```powershell
 dsh plugin --profile web add E:\test\rewrite-agently\mine-dsh-plugins\dsh-date-wrapper
 ```
 
-Or link mode while developing (source edits take effect immediately, no reinstall):
+Or link mode (source edits take effect after a restart, no reinstall):
 
 ```powershell
 dsh plugin --profile web add link:E:\test\rewrite-agently\mine-dsh-plugins\dsh-date-wrapper
 ```
 
+> ⚠️ A local `file:` / `link:` install makes the profile depend on that path. Renaming or deleting the directory then breaks **every** pnpm operation in the profile with `ENOENT` until the stale dependency is removed — exactly what happened when this package was renamed from `dsh-time-wrapper`.
 > ⚠️ A relative path is only anchored to **your current directory** when it starts with `.` or `..`;
 > `mine-dsh-plugins\dsh-date-wrapper` is resolved inside the profile directory and will not be found. Absolute paths are safest.
 
@@ -83,6 +90,7 @@ node tests/context.test.mjs
 | No date under some presets | That preset's persona sets `includeRuntimeContext: false` (the official `minimal` and the local `simple-reply` both do). Such presets explicitly forbid later listeners from adding prompt content, so this plugin's runtime context is dropped — expected behaviour |
 | The date is off by one day | `timeZone` does not match your actual zone; across a zone boundary (e.g. 00:30 Beijing = 16:30 UTC the previous day) that shows up as a one-day difference |
 | You also see `Time sampled …` | Some preset mounts `@deepseek-ai/dsh-time-context` explicitly. This plugin neither loads nor filters it; the two should not be used together |
+| Any pnpm operation in the profile fails with `ENOENT: no such file or directory, open '…'` | A `file:` / `link:` dependency points at a path that no longer exists (the package was renamed, or its tarball was deleted). Remove the stale dependency with `dsh plugin --profile web remove <name>` and install again; `github:` installs do not have this failure mode |
 
 ## 5. On/off (no panel toggle — activation is the switch)
 

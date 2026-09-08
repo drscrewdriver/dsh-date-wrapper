@@ -22,18 +22,25 @@ pnpm --version          # `dsh plugin` is a pnpm forwarder, so pnpm must be on P
 
 ## 1. 설치
 
-**절대 경로**를 사용하십시오(권장 — 경로가 그대로 pnpm에 전달됩니다):
+**GitHub에서 설치**하는 것을 권장합니다(pnpm이 패키지를 `node_modules`로 복사하고, lockfile이 정확한 커밋을 고정합니다):
+
+```powershell
+dsh plugin --profile web add github:drscrewdriver/dsh-date-wrapper
+```
+
+또는 로컬 디렉터리에서(개발 시):
 
 ```powershell
 dsh plugin --profile web add E:\test\rewrite-agently\mine-dsh-plugins\dsh-date-wrapper
 ```
 
-또는 개발 중에는 링크 모드로(소스 수정이 즉시 반영되며 재설치가 필요 없습니다):
+또는 링크 모드(소스 수정은 재시작 후 반영되며 재설치가 필요 없습니다):
 
 ```powershell
 dsh plugin --profile web add link:E:\test\rewrite-agently\mine-dsh-plugins\dsh-date-wrapper
 ```
 
+> ⚠️ 로컬 `file:` / `link:` 설치는 프로필이 그 경로에 의존하게 만듭니다. 디렉터리가 이름이 바뀌거나 삭제되면, 만료된 의존성을 제거할 때까지 프로필의 **모든** pnpm 작업이 `ENOENT`로 실패합니다 — 이 패키지가 `dsh-time-wrapper`에서 개명되었을 때 실제로 일어난 일입니다.
 > ⚠️ 상대 경로는 `.` 또는 `..`로 시작할 때만 **현재 디렉터리**를 기준으로 삼습니다;
 > `mine-dsh-plugins\dsh-date-wrapper`는 프로필 디렉터리 안에서 해석되므로 찾지 못합니다. 절대 경로가 가장 안전합니다.
 
@@ -83,6 +90,7 @@ node tests/context.test.mjs
 | 일부 프리셋에서 날짜가 없음 | 그 프리셋의 페르소나가 `includeRuntimeContext: false`를 설정합니다(공식 `minimal`과 로컬 `simple-reply` 모두 그렇게 합니다). 그런 프리셋은 이후 리스너가 프롬프트 콘텐츠를 추가하는 것을 명시적으로 금지하므로 이 플러그인의 런타임 컨텍스트가 버려집니다 — 정상 동작입니다 |
 | 날짜가 하루 어긋남 | `timeZone`이 실제 존과 맞지 않습니다; 존 경계를 넘을 때(예: 베이징 00:30 = UTC 전날 16:30) 하루 차이로 나타납니다 |
 | `Time sampled …`도 함께 보임 | 어떤 프리셋이 `@deepseek-ai/dsh-time-context`를 명시적으로 마운트한 것입니다. 이 플러그인은 이를 로드하지도 필터링하지도 않으며, 둘은 함께 사용해서는 안 됩니다 |
+| 프로필의 모든 pnpm 작업이 `ENOENT: no such file or directory, open '…'`로 실패 | `file:` / `link:` 의존성이 더 이상 존재하지 않는 경로를 가리키고 있습니다(패키지 이름 변경 또는 tarball 삭제). 먼저 `dsh plugin --profile web remove <이름>`으로 만료된 의존성을 제거한 뒤 다시 설치하십시오. `github:` 설치는 이 실패 모드가 없습니다 |
 
 ## 5. 켜기/끄기(패널 토글 없음 — 활성화가 스위치)
 
