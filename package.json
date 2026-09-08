@@ -1,0 +1,48 @@
+{
+  "name": "dsh-date-wrapper",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Minimal date line for the DeepSeek Harness runtime-context snapshot: 'Current date: 2026-09-08 Asia/Shanghai Tuesday' (46 chars, ~12 tokens) - a cordis host plugin, no dsh source changes, no PR required",
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "plugin",
+    "time",
+    "date",
+    "context",
+    "timezone"
+  ],
+  "license": "MIT",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src/",
+    "docs/",
+    "cordis.patch.yml",
+    "README.md",
+    "INSTALL.zh.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "test": "node --test \"tests/*.test.mjs\"",
+    "tdd": "node --test --watch \"tests/*.test.mjs\"",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "verify": "npm run lint && npm run test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.10.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

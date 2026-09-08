@@ -1,0 +1,16 @@
+# dsh-date-wrapper bundle patch：一行装配进 profile。
+#
+# host 半（src/index.js）把当前日期注册为一条动态运行上下文，
+# 由平台并入自己那条「Current runtime context」快照消息，文本形如：
+#   Current date: 2026-09-08 Asia/Shanghai Tuesday
+#
+# 设计取舍：不加载 @deepseek-ai/dsh-time-context。Cordis 的 prepend 用 unshift，
+# 子 fiber 异步加载后注册的监听器会跑到 wrapper 外面，verbose 文本既看不到也删不掉
+# （详见 .agents/plans/dsh-date-wrapper/findings.md 的 D1）。
+#
+# config 随行下发；改时区只需改这里。
+- insert:
+    - id: date-wrapper
+      name: dsh-date-wrapper
+      config:
+        timeZone: Asia/Shanghai
