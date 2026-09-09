@@ -12,6 +12,19 @@
 - [日本語 changelog](./CHANGELOG.ja.md)
 - [한국어 changelog](./CHANGELOG.ko.md)
 
+> **▼ DSH version compatibility**
+>
+> | DSH version | Load | Host contract | Client half |
+> | --- | --- | --- | --- |
+> | 0.1.0-rc.7 ~ 0.1.1-rc.x | ✅ | `systemPrompt.context({ name, order, text })` | — (host-only plugin) |
+> | 0.1.2-alpha.2+ / 0.1.2-rc.1 | ✅ | same signature, byte-identical | — (host-only plugin) |
+>
+> One artifact covers both: the plugin only calls `systemPrompt.context`, whose
+> signature and semantics are unchanged between `dsh-v0.1.1-rc.2` and
+> `dsh-v0.1.2-rc.1`. It registers no settings namespace, reads no session data and
+> makes no RPC call, so the 0.1.1 → 0.1.2 client/session/persistence rewrites do
+> not touch it.
+
 > A minimal date line: it hangs `Current date: 2026-09-08 Asia/Shanghai Tuesday` (46 characters, ~12 tokens) onto the runtime-context snapshot DSH already sends.
 > It does **not** load `@deepseek-ai/dsh-time-context`, does **not** add extra session messages, does **not** patch DSH source, and needs no PR.
 

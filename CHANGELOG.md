@@ -15,6 +15,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - [日本語 changelog](./CHANGELOG.ja.md)
 - [한국어 changelog](./CHANGELOG.ko.md)
 
+## Unreleased
+
+### Changed
+
+- **DSH dual-version support (0.1.0-rc.7 … 0.1.2-rc.1).** Documented the compatibility matrix in
+  the README (EN/ZH) and added `engines.dsh`. No code change: the plugin's only host contract,
+  `systemPrompt.context({ name, order, text })`, is signature- and semantics-identical between
+  `dsh-v0.1.1-rc.2` and `dsh-v0.1.2-rc.1`, and the plugin registers no settings namespace, reads
+  no session data and makes no RPC call.
+
 ## 0.1.0 — 2026-09-08
 
 First release.

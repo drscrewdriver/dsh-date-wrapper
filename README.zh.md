@@ -12,6 +12,17 @@
 - [日本語 changelog](./CHANGELOG.ja.md)
 - [한국어 changelog](./CHANGELOG.ko.md)
 
+> **▼ DSH 版本适配**
+>
+> | DSH 版本 | 加载 | 宿主契约 | 客户端半 |
+> | --- | --- | --- | --- |
+> | 0.1.0-rc.7 ~ 0.1.1-rc.x | ✅ | `systemPrompt.context({ name, order, text })` | —（纯宿主插件） |
+> | 0.1.2-alpha.2+ / 0.1.2-rc.1 | ✅ | 同一签名，字节一致 | —（纯宿主插件） |
+>
+> 一份产物同时支持两版本：插件只调用 `systemPrompt.context`，其签名与语义在
+> `dsh-v0.1.1-rc.2` 与 `dsh-v0.1.2-rc.1` 之间未变。它不注册设置命名空间、不读会话
+> 数据、不发 RPC，因此 0.1.1 → 0.1.2 的客户端／会话／持久化重写都与它无关。
+
 > 精简版时间注入：把 `Current date: 2026-09-08 Asia/Shanghai Tuesday`（46 字符 ≈ 12 token）挂进 DSH 自带的运行上下文快照。
 > 不加载 `@deepseek-ai/dsh-time-context`，不产生额外会话消息，不改 DSH 源码，不提 PR。
 
