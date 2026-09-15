@@ -1,0 +1,21 @@
+{
+  "id": "dsh-date-wrapper",
+  "name": "dsh-date-wrapper",
+  "version": "0.1.1-beta.1",
+  "description": {
+    "en": "Minimal date line for the DeepSeek Harness runtime-context snapshot: a single compact line such as 'Current date: 2026-09-08 Asia/Shanghai Tuesday' (46 chars, ~12 tokens). A cordis host plugin with no DSH source changes.",
+    "zh": "为 DeepSeek Harness 运行时上下文快照提供极简日期行：形如「Current date: 2026-09-08 Asia/Shanghai Tuesday」的单行紧凑输出（46 字符，约 12 token）。纯 cordis 宿主插件，不改动 DSH 源码。"
+  },
+  "homepage": "https://github.com/drscrewdriver/dsh-date-wrapper#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/drscrewdriver/dsh-date-wrapper.git"
+  },
+  "license": "MIT",
+  "engines": {
+    "dsh": ">=0.1.0-rc.7 <0.2.0-0"
+  },
+  "components": {
+    "host": "src/index.js"
+  }
+}

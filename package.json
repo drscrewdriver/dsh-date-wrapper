@@ -13,6 +13,11 @@
     "timezone"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/drscrewdriver/dsh-date-wrapper.git"
+  },
+  "homepage": "https://github.com/drscrewdriver/dsh-date-wrapper#readme",
   "main": "src/index.js",
   "exports": {
     ".": "./src/index.js",
@@ -22,6 +27,8 @@
     "src/",
     "docs/",
     "cordis.patch.yml",
+    "dsh.plugin.json",
+    "screenshots.json",
     "README.md",
     "README.zh.md",
     "README.ja.md",
