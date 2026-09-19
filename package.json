@@ -1,6 +1,6 @@
 {
   "name": "dsh-date-wrapper",
-  "version": "0.1.1-beta.1",
+  "version": "0.1.1",
   "type": "module",
   "description": "Minimal date line for the DeepSeek Harness runtime-context snapshot: 'Current date: 2026-09-08 Asia/Shanghai Tuesday' (46 chars, ~12 tokens) - a cordis host plugin, no dsh source changes, no PR required",
   "keywords": [
