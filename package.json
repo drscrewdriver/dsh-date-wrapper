@@ -1,6 +1,6 @@
 {
   "name": "dsh-date-wrapper",
-  "version": "0.1.1-beta.1",
+  "version": "0.2.0-beta.1",
   "type": "module",
   "description": "Minimal date line for the DeepSeek Harness runtime-context snapshot: 'Current date: 2026-09-08 Asia/Shanghai Tuesday' (46 chars, ~12 tokens) - a cordis host plugin, no dsh source changes, no PR required",
   "keywords": [
@@ -48,6 +48,17 @@
       "patch": "./cordis.patch.yml"
     }
   },
+  "publishConfig": {
+    "tag": "dsh-0.1.7"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.2"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    }
+  },
   "scripts": {
     "test": "node --test \"tests/*.test.mjs\"",
     "tdd": "node --test --watch \"tests/*.test.mjs\"",
@@ -61,6 +72,6 @@
   },
   "engines": {
     "node": ">=20",
-    "dsh": ">=0.1.0-rc.7 <0.2.0-0"
+    "dsh": ">=0.1.5-rc.1 <0.2.0-0"
   }
 }
