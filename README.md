@@ -16,14 +16,18 @@
 >
 > | DSH version | Load | Host contract | Client half |
 > | --- | --- | --- | --- |
-> | 0.1.0-rc.7 ~ 0.1.1-rc.x | ✅ | `systemPrompt.context({ name, order, text })` | — (host-only plugin) |
-> | 0.1.2-alpha.2+ / 0.1.2-rc.1 | ✅ | same signature, byte-identical | — (host-only plugin) |
+> | 0.1.0-rc.7 ~ 0.1.4.x, 0.1.6 ~ 0.1.7.x | ✅ artifact ≤ 0.2.0 | `systemPrompt.context({ name, order, text })` | — (host-only plugin) |
+> | 0.1.5-rc.1+ (`>=0.1.5-rc.1 <0.1.6-0`) | ✅ artifact 0.1.5 (dist-tag `dsh-0.1.5`) | same signature; orders 110/115/120 taken, 116 free | — (host-only plugin) |
+> | 0.2.0-rc.1+ (`>=0.2.0-rc.1 <0.2.1-0`) | ✅ artifact ≥ 0.3.0 | same signature; `packages/core/system-prompt` diff vs `dsh-v0.1.7-rc.2` is the version string only | — (host-only plugin) |
 >
-> One artifact covers both: the plugin only calls `systemPrompt.context`, whose
-> signature and semantics are unchanged between `dsh-v0.1.1-rc.2` and
-> `dsh-v0.1.2-rc.1`. It registers no settings namespace, reads no session data and
-> makes no RPC call, so the 0.1.1 → 0.1.2 client/session/persistence rewrites do
-> not touch it.
+> One contract covers all lines: the plugin only calls `systemPrompt.context`, whose
+> signature and semantics are unchanged from `dsh-v0.1.1-rc.2` through
+> `dsh-v0.2.0-rc.1`. It registers no settings namespace, reads no session data and
+> makes no RPC call, so the 0.1.1 → 0.1.2 client/session/persistence rewrites and
+> the 0.1.7 → 0.2.0-rc.1 host changes do not touch it. Host 0.1.5-rc.1+ uses its own
+> artifact 0.1.5 (dist-tag `dsh-0.1.5`, vendor cordis 4.0.2 → peer `^4.0.2`); other older
+> 0.1.x hosts stay on artifact ≤ 0.2.0 (dist-tag `dsh-0.1.7`); the 0.2.0 line is served by
+> artifact ≥ 0.3.0.
 
 > A minimal date line: it hangs `Current date: 2026-09-08 Asia/Shanghai Tuesday` (46 characters, ~12 tokens) onto the runtime-context snapshot DSH already sends.
 > It does **not** load `@deepseek-ai/dsh-time-context`, does **not** add extra session messages, does **not** patch DSH source, and needs no PR.
@@ -59,22 +63,24 @@ Current date: 2026-09-08 Asia/Shanghai Tuesday
 
 | Item | Verdict |
 |------|---------|
-| Target DSH versions | 0.1.0-rc.7 → 0.1.3-alpha.2 (contract stable, see the table below) |
+| Target DSH versions | 0.1.0-rc.7 → 0.1.4.x / 0.1.6 → 0.1.7.x (0.1.x line — artifact ≤ 0.2.0); 0.1.5-rc.1 → 0.1.5.x (dedicated line, `engines.dsh: >=0.1.5-rc.1 <0.1.6-0` — artifact 0.1.5, dist-tag `dsh-0.1.5`); 0.2.0-rc.1 → 0.2.0.x (0.2.0 line, `engines.dsh: >=0.2.0-rc.1 <0.2.1-0` — artifact ≥ 0.3.0) |
 | settings API | **Not applicable**: the plugin registers no settings and exports no schemastery `Config` |
 | Contract points used | Exactly one — `systemPrompt.context()` |
 | Conflict with a native feature | Overlaps `@deepseek-ai/dsh-time-context`; **do not use both**. Not installed by default = off by default |
 | Browser half | **None**: no slot, no DOM, no CSS semantic tokens |
 | DSH package imports | **Zero**: nothing from `@deepseek-ai/*`, which is stricter than the "runtime detection + dual API fallback" pattern |
 
-| Contract point | 0.1.0-rc.7 | 0.1.1-rc.2 | 0.1.2-rc.1 | 0.1.3-alpha.2 |
-|---|---|---|---|---|
-| `systemPrompt.context(ctx): () => void` | yes | yes (verified on this host) | yes | yes |
-| `PromptContext = { name, order, text }`, no `complete` field | yes | yes | yes | yes |
-| `includeRuntimeContext` / `suppressRuntimeContext` | yes | yes | yes | yes |
-| agent-loop `project()` text dedupe and `surfaceOp: "append"` | yes | yes | yes | not compared |
+| Contract point | 0.1.0-rc.7 | 0.1.1-rc.2 | 0.1.2-rc.1 | 0.1.3-alpha.2 | 0.1.5-rc.2 | 0.1.7-rc.2 | 0.2.0-rc.1 |
+|---|---|---|---|---|---|---|---|
+| `systemPrompt.context(ctx): () => void` | yes | yes (verified on this host) | yes | yes | yes | yes | yes (diff vs 0.1.7-rc.2: version string only) |
+| `PromptContext = { name, order, text }`, no `complete` field | yes | yes | yes | yes | yes | yes | yes |
+| `includeRuntimeContext` / `suppressRuntimeContext` | yes | yes | yes | yes | yes | yes | yes |
+| agent-loop `project()` text dedupe and `surfaceOp: "append"` | yes | yes | yes | not compared | yes | yes | yes |
+| `order: 116` collision-free (110 / 115 / 120 taken) | yes | yes | yes | yes | yes | yes | yes (0.1.5-rc.2) |
 
 > Method: `npm pack @deepseek-ai/dsh-system-prompt@<version>`, unpack, and compare `lib/types/index.d.ts` and `lib/index.js`; the same for `@deepseek-ai/dsh-agent-loop`.
-> Only 0.1.1-rc.2 has been verified **at runtime** on this host; runtime verification on 0.1.2-rc.1 / 0.1.3-alpha.2 is still pending (see `HANDOVER.md` §7).
+> Between `dsh-v0.1.7-rc.2` and `dsh-v0.2.0-rc.1` the `packages/core/system-prompt` diff is a single version line, the 110/115/120 `systemPrompt.context` call sites are unchanged, and the plugin migration guide has no `systemPrompt` entry.
+> Only 0.1.1-rc.2 has been verified **at runtime** on this host; runtime smoke on 0.2.0-rc.1 is tracked in `HANDOVER.md` §7.
 
 ## Why a runtime-context snapshot instead of a message
 

@@ -46,22 +46,24 @@ Current date: 2026-09-08 Asia/Shanghai Tuesday
 
 | 項目 | 判定 |
 |------|---------|
-| 対象 DSH バージョン | 0.1.0-rc.7 → 0.1.3-alpha.2（コントラクトは安定。下の表を参照） |
+| 対象 DSH バージョン | 0.1.0-rc.7 → 0.1.4.x / 0.1.6 → 0.1.7.x（0.1.x 系 — アーティファクト ≤ 0.2.0）；0.1.5-rc.1 → 0.1.5.x（専用ライン、`engines.dsh: >=0.1.5-rc.1 <0.1.6-0` — アーティファクト 0.1.5、dist-tag `dsh-0.1.5`）；0.2.0-rc.1 → 0.2.0.x（0.2.0 系、`engines.dsh: >=0.2.0-rc.1 <0.2.1-0` — アーティファクト ≥ 0.3.0） |
 | settings API | **該当なし**: プラグインは設定を登録せず、schemastery の `Config` もエクスポートしません |
 | 使用しているコントラクトポイント | ちょうど 1 つ — `systemPrompt.context()` |
 | ネイティブ機能との競合 | `@deepseek-ai/dsh-time-context` と重複します。**両方を同時に使わないでください**。デフォルトではインストールされない = デフォルトでオフ |
 | ブラウザ側 | **なし**: スロットも DOM も CSS セマンティックトークンもありません |
 | DSH パッケージのインポート | **ゼロ**: `@deepseek-ai/*` から何も取り込みません。これは「実行時検出 + デュアル API フォールバック」パターンよりも厳格です |
 
-| コントラクトポイント | 0.1.0-rc.7 | 0.1.1-rc.2 | 0.1.2-rc.1 | 0.1.3-alpha.2 |
-|---|---|---|---|---|
-| `systemPrompt.context(ctx): () => void` | yes | yes（このホストで検証済み） | yes | yes |
-| `PromptContext = { name, order, text }`、`complete` フィールドなし | yes | yes | yes | yes |
-| `includeRuntimeContext` / `suppressRuntimeContext` | yes | yes | yes | yes |
-| agent-loop の `project()` によるテキスト重複排除と `surfaceOp: "append"` | yes | yes | yes | 未比較 |
+| コントラクトポイント | 0.1.0-rc.7 | 0.1.1-rc.2 | 0.1.2-rc.1 | 0.1.3-alpha.2 | 0.1.5-rc.2 | 0.1.7-rc.2 | 0.2.0-rc.1 |
+|---|---|---|---|---|---|---|---|
+| `systemPrompt.context(ctx): () => void` | yes | yes（このホストで検証済み） | yes | yes | yes | yes | yes（0.1.7-rc.2 との差分はバージョン文字列のみ） |
+| `PromptContext = { name, order, text }`、`complete` フィールドなし | yes | yes | yes | yes | yes | yes | yes |
+| `includeRuntimeContext` / `suppressRuntimeContext` | yes | yes | yes | yes | yes | yes | yes |
+| agent-loop の `project()` によるテキスト重複排除と `surfaceOp: "append"` | yes | yes | yes | 未比較 | yes | yes | yes |
+| `order: 116` の衝突なし（110 / 115 / 120 は使用中） | yes | yes | yes | yes | yes | yes | yes（0.1.5-rc.2） |
 
 > 方法: `npm pack @deepseek-ai/dsh-system-prompt@<version>` で取得して展開し、`lib/types/index.d.ts` と `lib/index.js` を比較。`@deepseek-ai/dsh-agent-loop` も同様。
-> このホストで**実行時に**検証済みなのは 0.1.1-rc.2 のみです。0.1.2-rc.1 / 0.1.3-alpha.2 の実行時検証はまだ保留中です（`HANDOVER.md` §7 を参照）。
+> `dsh-v0.1.7-rc.2` と `dsh-v0.2.0-rc.1` の間で `packages/core/system-prompt` の差分はバージョン 1 行のみで、110/115/120 の `systemPrompt.context` 呼び出し箇所はそのまま、プラグイン移行ガイドに `systemPrompt` の項目はありません。
+> このホストで**実行時に**検証済みなのは 0.1.1-rc.2 のみです。0.2.0-rc.1 の実行時スモークは `HANDOVER.md` §7 を参照。
 
 ## メッセージではなくランタイムコンテキストスナップショットを使う理由
 

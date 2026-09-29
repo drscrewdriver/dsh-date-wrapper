@@ -16,7 +16,7 @@
 
 ```powershell
 echo $env:DSH_HOME      # 通常是 C:\Users\<你>\.dsh
-dsh --version           # 本指南验证于 0.1.1-rc.2
+dsh --version           # 本指南验证于 0.1.1-rc.2（0.1.x 线，插件 ≤ 0.2.0）；0.1.5-rc.1+ 使用插件 0.1.5（dist-tag dsh-0.1.5）；0.2.0-rc.1+ 需插件 ≥ 0.3.0（engines >=0.2.0-rc.1 <0.2.1-0）
 pnpm --version          # dsh plugin 是 pnpm 转发器，pnpm 必须在 PATH 上
 ```
 

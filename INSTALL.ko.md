@@ -16,7 +16,7 @@
 
 ```powershell
 echo $env:DSH_HOME      # usually C:\Users\<you>\.dsh
-dsh --version           # this guide was verified on 0.1.1-rc.2
+dsh --version           # 이 가이드는 0.1.1-rc.2에서 검증됨(0.1.x 라인, 플러그인 ≤ 0.2.0). 0.1.5-rc.1+는 플러그인 0.1.5 사용(dist-tag dsh-0.1.5). 0.2.0-rc.1+에는 플러그인 ≥ 0.3.0 필요(engines >=0.2.0-rc.1 <0.2.1-0)
 pnpm --version          # `dsh plugin` is a pnpm forwarder, so pnpm must be on PATH
 ```
 
