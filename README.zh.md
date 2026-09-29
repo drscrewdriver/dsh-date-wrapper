@@ -16,12 +16,14 @@
 >
 > | DSH 版本 | 加载 | 宿主契约 | 客户端半 |
 > | --- | --- | --- | --- |
-> | 0.1.0-rc.7 ~ 0.1.1-rc.x | ✅ | `systemPrompt.context({ name, order, text })` | —（纯宿主插件） |
-> | 0.1.2-alpha.2+ / 0.1.2-rc.1 | ✅ | 同一签名，字节一致 | —（纯宿主插件） |
+> | 0.1.0-rc.7 ~ 0.1.7.x（0.1.x 线） | ✅ 产物 ≤ 0.2.0 | `systemPrompt.context({ name, order, text })` | —（纯宿主插件） |
+> | 0.2.0-rc.1+（`>=0.2.0-rc.1 <0.2.1-0`） | ✅ 产物 ≥ 0.3.0 | 同一签名；`packages/core/system-prompt` 相对 `dsh-v0.1.7-rc.2` 的 diff 仅版本号一行 | —（纯宿主插件） |
 >
-> 一份产物同时支持两版本：插件只调用 `systemPrompt.context`，其签名与语义在
-> `dsh-v0.1.1-rc.2` 与 `dsh-v0.1.2-rc.1` 之间未变。它不注册设置命名空间、不读会话
-> 数据、不发 RPC，因此 0.1.1 → 0.1.2 的客户端／会话／持久化重写都与它无关。
+> 一份契约覆盖所有版本线：插件只调用 `systemPrompt.context`，其签名与语义从
+> `dsh-v0.1.1-rc.2` 到 `dsh-v0.2.0-rc.1` 未变。它不注册设置命名空间、不读会话
+> 数据、不发 RPC，因此 0.1.1 → 0.1.2 的客户端／会话／持久化重写与 0.1.7 →
+> 0.2.0-rc.1 的宿主改动都与它无关。旧 0.1.x 宿主请使用产物 ≤ 0.2.0（dist-tag
+> `dsh-0.1.7`）；0.2.0 线由产物 ≥ 0.3.0 服务。
 
 > 精简版时间注入：把 `Current date: 2026-09-08 Asia/Shanghai Tuesday`（46 字符 ≈ 12 token）挂进 DSH 自带的运行上下文快照。
 > 不加载 `@deepseek-ai/dsh-time-context`，不产生额外会话消息，不改 DSH 源码，不提 PR。
@@ -57,22 +59,24 @@ Current date: 2026-09-08 Asia/Shanghai Tuesday
 
 | 项 | 结论 |
 |---|---|
-| 目标 DSH 版本 | 0.1.0-rc.7 → 0.1.3-alpha.2（契约稳定，见下表） |
+| 目标 DSH 版本 | 0.1.0-rc.7 → 0.1.7.x（0.1.x 线 — 产物 ≤ 0.2.0）与 0.2.0-rc.1 → 0.2.0.x（0.2.0 线，`engines.dsh: >=0.2.0-rc.1 <0.2.1-0` — 产物 ≥ 0.3.0） |
 | settings API | **不适用**：本插件不注册 settings，也不导出 schemastery `Config` |
 | 使用的契约点 | 只有一个 —— `systemPrompt.context()` |
 | 与原生功能冲突 | `@deepseek-ai/dsh-time-context` 功能重叠，**不要同时使用**。本插件默认不安装 = 默认关闭 |
 | client 半 | **无**：不涉及 slot / DOM / CSS 语义 token |
 | DSH 包 import | **零**：不 `import` 任何 `@deepseek-ai/*`，比「运行时检测 + 双 API 回退」更保守 |
 
-| 契约点 | 0.1.0-rc.7 | 0.1.1-rc.2 | 0.1.2-rc.1 | 0.1.3-alpha.2 |
-|---|---|---|---|---|
-| `systemPrompt.context(ctx): () => void` | ✅ | ✅（本机实装验证） | ✅ | ✅ |
-| `PromptContext = { name, order, text }`，无 `complete` 字段 | ✅ | ✅ | ✅ | ✅ |
-| `includeRuntimeContext` / `suppressRuntimeContext` | ✅ | ✅ | ✅ | ✅ |
-| agent-loop `project()` 按文本去重、`surfaceOp: "append"` | ✅ | ✅ | ✅ | 未比对 |
+| 契约点 | 0.1.0-rc.7 | 0.1.1-rc.2 | 0.1.2-rc.1 | 0.1.3-alpha.2 | 0.1.7-rc.2 | 0.2.0-rc.1 |
+|---|---|---|---|---|---|---|
+| `systemPrompt.context(ctx): () => void` | ✅ | ✅（本机实装验证） | ✅ | ✅ | ✅ | ✅（相对 0.1.7-rc.2 diff 仅版本号） |
+| `PromptContext = { name, order, text }`，无 `complete` 字段 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `includeRuntimeContext` / `suppressRuntimeContext` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| agent-loop `project()` 按文本去重、`surfaceOp: "append"` | ✅ | ✅ | ✅ | 未比对 | ✅ | ✅ |
+| `order: 116` 无碰撞（110 / 115 / 120 已占用） | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 > 验证方式：`npm pack @deepseek-ai/dsh-system-prompt@<版本>` 解包后比对 `lib/types/index.d.ts` 与 `lib/index.js`；`@deepseek-ai/dsh-agent-loop` 同法。
-> **运行时**只在本机 0.1.1-rc.2 上验证过；0.1.2-rc.1 / 0.1.3-alpha.2 的运行时验证仍待做（见 `HANDOVER.md` §7）。
+> `dsh-v0.1.7-rc.2` 与 `dsh-v0.2.0-rc.1` 之间，`packages/core/system-prompt` 的 diff 仅版本号一行，110/115/120 的 `systemPrompt.context` 调用点原位未动，插件迁移指南无任何 `systemPrompt` 条目。
+> **运行时**只在本机 0.1.1-rc.2 上验证过；0.2.0-rc.1 的运行时冒烟记录见 `HANDOVER.md` §7。
 
 ## 为什么用运行上下文快照，而不是消息
 

@@ -25,6 +25,22 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   `dsh-v0.1.1-rc.2` and `dsh-v0.1.2-rc.1`, and the plugin registers no settings namespace, reads
   no session data and makes no RPC call.
 
+## 0.3.0 — 2026-09-29
+
+### Changed
+
+- **DSH 0.2.0 line support (`>=0.2.0-rc.1 <0.2.1-0`).** `engines.dsh` updated in both
+  `package.json` and `dsh.plugin.json`; version bumped to 0.3.0 in both manifests. No code
+  change: between `dsh-v0.1.7-rc.2` and `dsh-v0.2.0-rc.1` the `packages/core/system-prompt`
+  diff is a single version line, the `order: 116` slot stays collision-free (110/115/120
+  unchanged), and the plugin migration guide has no `systemPrompt` entry. The 0.1.x line
+  (0.1.0-rc.7 → 0.1.7.x) remains served by artifact ≤ 0.2.0 (dist-tag `dsh-0.1.7`).
+
+### Fixed
+
+- Reconciled the npm-published 0.2.0 version bump into git history (it was previously
+  published from an uncommitted working tree).
+
 ## 0.1.0 — 2026-09-08
 
 First release.

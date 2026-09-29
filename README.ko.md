@@ -46,22 +46,24 @@ Current date: 2026-09-08 Asia/Shanghai Tuesday
 
 | 항목 | 판정 |
 |------|---------|
-| 대상 DSH 버전 | 0.1.0-rc.7 → 0.1.3-alpha.2 (계약 안정, 아래 표 참조) |
+| 대상 DSH 버전 | 0.1.0-rc.7 → 0.1.7.x (0.1.x 라인 — 아티팩트 ≤ 0.2.0) 및 0.2.0-rc.1 → 0.2.0.x (0.2.0 라인, `engines.dsh: >=0.2.0-rc.1 <0.2.1-0` — 아티팩트 ≥ 0.3.0) |
 | settings API | **해당 없음**: 이 플러그인은 settings를 등록하지 않고 schemastery `Config`도 내보내지 않습니다 |
 | 사용하는 계약 지점 | 정확히 하나 — `systemPrompt.context()` |
 | 네이티브 기능과의 충돌 | `@deepseek-ai/dsh-time-context`와 중복됩니다; **둘 다 사용하지 마십시오**. 기본 미설치 = 기본 꺼짐 |
 | 브라우저 절반 | **없음**: 슬롯 없음, DOM 없음, CSS 시맨틱 토큰 없음 |
 | DSH 패키지 임포트 | **0건**: `@deepseek-ai/*`에서 아무것도 가져오지 않으며, 이는 "런타임 감지 + 이중 API 폴백" 패턴보다 더 엄격합니다 |
 
-| 계약 지점 | 0.1.0-rc.7 | 0.1.1-rc.2 | 0.1.2-rc.1 | 0.1.3-alpha.2 |
-|---|---|---|---|---|
-| `systemPrompt.context(ctx): () => void` | 예 | 예(이 호스트에서 검증됨) | 예 | 예 |
-| `PromptContext = { name, order, text }`, `complete` 필드 없음 | 예 | 예 | 예 | 예 |
-| `includeRuntimeContext` / `suppressRuntimeContext` | 예 | 예 | 예 | 예 |
-| agent-loop의 `project()` 텍스트 중복 제거와 `surfaceOp: "append"` | 예 | 예 | 예 | 비교하지 않음 |
+| 계약 지점 | 0.1.0-rc.7 | 0.1.1-rc.2 | 0.1.2-rc.1 | 0.1.3-alpha.2 | 0.1.7-rc.2 | 0.2.0-rc.1 |
+|---|---|---|---|---|---|---|
+| `systemPrompt.context(ctx): () => void` | 예 | 예(이 호스트에서 검증됨) | 예 | 예 | 예 | 예(0.1.7-rc.2 대비 diff는 버전 문자열 1줄뿐) |
+| `PromptContext = { name, order, text }`, `complete` 필드 없음 | 예 | 예 | 예 | 예 | 예 | 예 |
+| `includeRuntimeContext` / `suppressRuntimeContext` | 예 | 예 | 예 | 예 | 예 | 예 |
+| agent-loop의 `project()` 텍스트 중복 제거와 `surfaceOp: "append"` | 예 | 예 | 예 | 비교하지 않음 | 예 | 예 |
+| `order: 116` 충돌 없음(110 / 115 / 120 사용 중) | 예 | 예 | 예 | 예 | 예 | 예 |
 
 > 방법: `npm pack @deepseek-ai/dsh-system-prompt@<version>`으로 묶은 뒤 풀고 `lib/types/index.d.ts`와 `lib/index.js`를 비교합니다; `@deepseek-ai/dsh-agent-loop`도 같은 방식입니다.
-> 이 호스트에서 **런타임에서** 검증된 것은 0.1.1-rc.2뿐이며, 0.1.2-rc.1 / 0.1.3-alpha.2의 런타임 검증은 아직 대기 중입니다(`HANDOVER.md` §7 참조).
+> `dsh-v0.1.7-rc.2`와 `dsh-v0.2.0-rc.1` 사이 `packages/core/system-prompt`의 diff는 버전 1줄뿐이고, 110/115/120의 `systemPrompt.context` 호출 지점은 그대로이며, 플러그인 마이그레이션 가이드에는 `systemPrompt` 항목이 없습니다.
+> 이 호스트에서 **런타임에서** 검증된 것은 0.1.1-rc.2뿐이며, 0.2.0-rc.1의 런타임 스모크는 `HANDOVER.md` §7을 참조하십시오.
 
 ## 메시지가 아니라 런타임 컨텍스트 스냅샷인 이유
 

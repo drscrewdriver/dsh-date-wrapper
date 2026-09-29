@@ -16,7 +16,7 @@
 
 ```powershell
 echo $env:DSH_HOME      # usually C:\Users\<you>\.dsh
-dsh --version           # this guide was verified on 0.1.1-rc.2
+dsh --version           # verified on 0.1.1-rc.2 (0.1.x line, plugin <= 0.2.0); 0.2.0-rc.1+ needs plugin >= 0.3.0 (engines >=0.2.0-rc.1 <0.2.1-0)
 pnpm --version          # `dsh plugin` is a pnpm forwarder, so pnpm must be on PATH
 ```
 
