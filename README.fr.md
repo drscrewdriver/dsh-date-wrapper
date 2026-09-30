@@ -1,0 +1,244 @@
+# dsh-date-wrapper
+
+- [English README](./README.md)
+- [中文 README](./README.zh.md)
+- [日本語 README](./README.ja.md)
+- [한국어 README](./README.ko.md)
+- [Français README](./README.fr.md)
+- [Deutsch README](./README.de.md)
+- [Italiano README](./README.it.md)
+- [Русский README](./README.ru.md)
+- [Español README](./README.es.md)
+- [Installation guide](./INSTALL.md)
+- [中文安装指南](./INSTALL.zh.md)
+- [日本語インストールガイド](./INSTALL.ja.md)
+- [한국어 설치 안내](./INSTALL.ko.md)
+- [Guide d'installation](./INSTALL.fr.md)
+- [Installationsanleitung](./INSTALL.de.md)
+- [Guida all'installazione](./INSTALL.it.md)
+- [Руководство по установке](./INSTALL.ru.md)
+- [Guía de instalación](./INSTALL.es.md)
+- [Changelog](./CHANGELOG.md)
+- [日本語 changelog](./CHANGELOG.ja.md)
+- [한국어 changelog](./CHANGELOG.ko.md)
+- [Français changelog](./CHANGELOG.fr.md)
+- [Deutsch changelog](./CHANGELOG.de.md)
+- [Italiano changelog](./CHANGELOG.it.md)
+- [Русский changelog](./CHANGELOG.ru.md)
+- [Español changelog](./CHANGELOG.es.md)
+
+> **▼ Compatibilité des versions de DSH**
+>
+> | Version de DSH | Chargement | Contrat côté hôte | Partie cliente |
+> | --- | --- | --- | --- |
+> | 0.1.0-rc.7 ~ 0.1.7.x (branche 0.1.x) | ✅ artefact ≤ 0.2.0 | `systemPrompt.context({ name, order, text })` | — (plugin hôte uniquement) |
+> | 0.2.0-rc.1+ (`>=0.2.0-rc.1 <0.2.1-0`) | ✅ artefact ≥ 0.3.0 | même signature ; le diff de `packages/core/system-prompt` par rapport à `dsh-v0.1.7-rc.2` se réduit à la chaîne de version | — (plugin hôte uniquement) |
+>
+> Un seul contrat couvre toutes les branches : le plugin n'appelle que `systemPrompt.context`, dont
+> la signature et la sémantique sont inchangées de `dsh-v0.1.1-rc.2` à
+> `dsh-v0.2.0-rc.1`. Il n'enregistre aucun espace de noms de réglages, ne lit aucune donnée de
+> session et n'effectue aucun appel RPC ; les réécritures client/session/persistance de la
+> 0.1.1 → 0.1.2 comme les changements côté hôte de la 0.1.7 → 0.2.0-rc.1 ne le touchent donc pas.
+> Les hôtes 0.1.x plus anciens restent sur un artefact ≤ 0.2.0 (dist-tag `dsh-0.1.7`) ;
+> la branche 0.2.0 est servie par un artefact ≥ 0.3.0.
+
+> Une ligne de date minimaliste : elle suspend `Current date: 2026-09-08 Asia/Shanghai Tuesday` (46 caractères, ~12 tokens) à l'instantané du contexte d'exécution que DSH envoie déjà.
+> Elle ne charge **pas** `@deepseek-ai/dsh-time-context`, n'ajoute **aucun** message de session supplémentaire, ne modifie **pas** le code source de DSH et ne nécessite aucune PR.
+
+- [Fonctionnement : sessions DSH, JSONL et assemblage des requêtes](./docs/dsh-session-and-context-mechanics.md) (en chinois)
+- [HANDOVER.md](./HANDOVER.md) (en chinois)
+
+## Ce que ce plugin résout
+
+Le `@deepseek-ai/dsh-time-context` intégré à DSH injecte environ **280 caractères** de métadonnées à chaque requête :
+
+```
+Time sampled while preparing turn 3, step 2: 2026-09-08T16:05:36+08:00[Asia/Shanghai]
+Browser time zone for this request: Asia/Shanghai. Interpret otherwise-unqualified dates and times in this zone.
+Elapsed since the preceding model-visible message: 2m 34s.
+```
+
+Ce plugin compresse la même information en une seule ligne de **46 caractères** et change son point d'arrivée — elle ne va plus dans le flux de messages :
+
+```
+Current date: 2026-09-08 Asia/Shanghai Tuesday
+```
+
+| Dimension | `dsh-time-context` | `dsh-date-wrapper` |
+|-----------|--------------------|--------------------|
+| Texte injecté | ~280 caractères | 46 caractères (↓84 %), ~12 tokens |
+| Point d'arrivée | Un message par pre-step (`user/message`) | L'instantané du contexte d'exécution de la plateforme (`systemPrompt.context`) |
+| Fréquence | Un événement par step éligible | Renvoyé avec l'instantané uniquement quand le texte change (0 événement dans une même journée) |
+| Dépendance | Service `agents` | Service `systemPrompt` |
+| Dépendances d'exécution | — | aucune |
+
+## Compatibilité des versions
+
+| Élément | Verdict |
+|------|---------|
+| Versions DSH ciblées | 0.1.0-rc.7 → 0.1.7.x (branche 0.1.x — artefact ≤ 0.2.0) et 0.2.0-rc.1 → 0.2.0.x (branche 0.2.0, `engines.dsh: >=0.2.0-rc.1 <0.2.1-0` — artefact ≥ 0.3.0) |
+| API settings | **Non applicable** : le plugin n'enregistre aucun réglage et n'exporte aucun `Config` schemastery |
+| Points de contrat utilisés | Un seul — `systemPrompt.context()` |
+| Conflit avec une fonctionnalité native | Chevauche `@deepseek-ai/dsh-time-context` ; **ne pas utiliser les deux**. Non installé par défaut = désactivé par défaut |
+| Partie navigateur | **Aucune** : pas de slot, pas de DOM, pas de token sémantique CSS |
+| Imports de paquets DSH | **Zéro** : rien de `@deepseek-ai/*`, ce qui est plus strict que le motif « détection à l'exécution + repli sur double API » |
+
+| Point de contrat | 0.1.0-rc.7 | 0.1.1-rc.2 | 0.1.2-rc.1 | 0.1.3-alpha.2 | 0.1.7-rc.2 | 0.2.0-rc.1 |
+|---|---|---|---|---|---|---|
+| `systemPrompt.context(ctx): () => void` | oui | oui (vérifié sur cet hôte) | oui | oui | oui | oui (diff par rapport à 0.1.7-rc.2 : chaîne de version uniquement) |
+| `PromptContext = { name, order, text }`, sans champ `complete` | oui | oui | oui | oui | oui | oui |
+| `includeRuntimeContext` / `suppressRuntimeContext` | oui | oui | oui | oui | oui | oui |
+| déduplication par texte du `project()` d'agent-loop et `surfaceOp: "append"` | oui | oui | oui | non comparé | oui | oui |
+| `order: 116` sans collision (110 / 115 / 120 déjà pris) | oui | oui | oui | oui | oui | oui |
+
+> Méthode : `npm pack @deepseek-ai/dsh-system-prompt@<version>`, décompression, puis comparaison de `lib/types/index.d.ts` et `lib/index.js` ; idem pour `@deepseek-ai/dsh-agent-loop`.
+> Entre `dsh-v0.1.7-rc.2` et `dsh-v0.2.0-rc.1`, le diff de `packages/core/system-prompt` tient en une seule ligne de version, les sites d'appel `systemPrompt.context` en 110/115/120 sont inchangés et le guide de migration des plugins ne mentionne aucun `systemPrompt`.
+> Seule la 0.1.1-rc.2 a été vérifiée **à l'exécution** sur cet hôte ; le test de fumée à l'exécution de la 0.2.0-rc.1 est suivi dans `HANDOVER.md` §7.
+
+## Pourquoi un instantané du contexte d'exécution plutôt qu'un message
+
+La première tentative imitait `dsh-time-context` en ajoutant un `user/message` dans `agent/pre-step`. Le coût mesuré était trop élevé : chaque événement JSONL pèse **339 octets** (le texte n'en représente que 46, car `content` et `sections` stockent chacun une copie) et il en écrivait **un à chaque tour**.
+
+Enregistrer un contexte d'exécution à la place fond la date dans le message d'instantané que la plateforme envoie déjà :
+
+- La plateforme **déduplique les instantanés par texte** (`RuntimeContextProjection.project()` dans `dsh-agent-loop` : `if (this.retained?.text === snapshot) return`) ; tant que la date ne change pas, **pas un seul événement supplémentaire n'est écrit** ;
+- Les instantanés **ajoutent** un nouveau message (`surfaceOp: 'append'`) au lieu de réécrire en place, la séquence de requêtes ne fait que croître → **le cache de préfixe est préservé** ;
+- Notre coût marginal se limite à ces 46 octets, et uniquement quand l'instantané est renvoyé parce que son texte a changé.
+
+Mesuré sur cet hôte (une session réelle, 10 tours / 231 étapes) :
+
+| Élément | Mesuré |
+|------|----------|
+| Instantanés de contexte d'exécution de la plateforme | 2 événements, 1133 o chacun, 2,3 Ko au total |
+| Vrais messages utilisateur | 10 événements, 396 o chacun |
+| Ancienne approche (un message par tour) | 10 × 339 o ≈ 3,4 Ko |
+| Cette approche | 0 événement supplémentaire ; ~46 o fondus dans un instantané existant |
+
+## Configuration
+
+Livré avec `cordis.patch.yml` ; redémarrer après modification :
+
+```yaml
+- insert:
+    - id: date-wrapper
+      name: dsh-date-wrapper
+      config:
+        timeZone: Asia/Shanghai   # IANA zone; omit to use the process zone
+```
+
+- Un `timeZone` invalide lève une exception au démarrage (**aucun** repli silencieux sur UTC).
+- Le nom de zone dans le texte est le nom IANA résolu (le nom de la zone du processus quand `timeZone` est omis).
+- L'entrée de contexte d'exécution s'appelle `date-wrapper:date` avec l'ordre `116` (déjà pris : 110 sandbox, 115 approval, 120 subagent).
+- Le plugin n'exporte **aucun `Config` schemastery** : sa configuration échappe à la validation de schéma de l'hôte ; tout est validé à la main dans `validateConfig()`. C'est aussi pourquoi la page Settings → Plugins n'affiche aucun formulaire de configuration pour lui.
+
+## Marche/arrêt : l'activation du plugin fait office d'interrupteur, il n'y a pas de bouton dans un panneau
+
+Le plugin n'embarque **ni** bouton dans un panneau de réglages **ni** champ de configuration `enabled`, parce que :
+
+- L'interrupteur, c'est *l'état actif de la ligne du plugin*. Inactive → `apply()` ne s'exécute jamais → l'entrée de contexte d'exécution n'existe pas → pas un seul caractère injecté.
+- Il n'y a pas de partie navigateur (`dsh.client`), donc l'UI ne possède aucun widget de notre part.
+- La page **Settings → Plugins** intégrée à DSH affiche déjà chaque entrée comme `enabled / disabled` (en lecture seule).
+
+### Comment le désactiver
+
+Surchargez-le par `id` dans **votre propre** couche de patch de profil — `C:\Users\<you>\.dsh\profiles\web\cordis.patch.yml` :
+
+```yaml
+- id: date-wrapper
+  disabled: true    # disabled; set back to false to restore
+```
+
+- **À chaud, sans redémarrage** : ce fichier est surveillé par le HMR de Cordis, et `disabled: true` détruit directement la fiber de la ligne.
+- Si la ligne `date-wrapper` n'existe pas encore (non installé), ce patch se contente d'un avertissement `entry "date-wrapper" not found` dans les logs ; le démarrage réussit quand même.
+- ⚠️ Le fichier doit être un **tableau YAML de premier niveau** ; s'il est mal formé, **le démarrage échoue** (DSH est fail-loud pour les couches de patch utilisateur).
+
+### Comment le supprimer complètement
+
+```bash
+dsh plugin --profile web remove dsh-date-wrapper
+```
+
+La suppression passe par la couche bundle et **nécessite un redémarrage** de dsh web (les patches de bundle ne sont pas rechargés à chaud).
+
+## Installation
+
+```bash
+dsh plugin --profile web add github:drscrewdriver/dsh-date-wrapper
+```
+
+Redémarrez dsh web et rafraîchissez la page. Chemins locaux, mode link et dépannage : [INSTALL.fr.md](./INSTALL.fr.md).
+
+## Vérification
+
+| # | Comment | Attendu |
+|---|-----|----------|
+| A1 | Ouvrir une nouvelle session et envoyer un message | L'instantané du contexte d'exécution contient `Current date: YYYY-MM-DD <zone> <weekday>` (affiché comme une ligne de contexte injecté provenant de `system-prompt`) |
+| A2 | Vérifier cette ligne | ≤50 caractères (46 mesurés ; le seuil PRD de 30 a été assoupli pour le format demandé) |
+| A3 | Désactiver le plugin (patch de profil `disabled: true`) | La ligne n'apparaît plus dans les instantanés des sessions suivantes |
+| A4 | Chercher dans le journal de session | Aucun `Time sampled` / `Elapsed since` / `Browser time zone` |
+| A5 | Mettre `timeZone` à `UTC` et redémarrer | La date suit UTC (peut différer d'un jour à cheval sur deux zones) |
+
+## Notes d'implémentation
+
+```
+dsh-date-wrapper/
+├── package.json          # name / type: module / main / exports["."] / dsh.bundle.patch / files
+├── cordis.patch.yml      # one insert row (no patch-level id → lands at the profile root = host plane)
+├── src/
+│   ├── format.js         # pure functions: resolveZone / renderDate / createDateContextText / validateConfig / TEXT_LABEL
+│   └── index.js          # apply(ctx, config) → ctx.inject(['systemPrompt'], …) → systemPrompt.context(...)
+└── tests/
+    ├── format.test.mjs   # 11 cases (zone projection, weekday, format and length, degradation, config validation)
+    └── context.test.mjs  # 7 cases (registration contract against a fake ctx)
+```
+
+- **Ligne côté hôte** : `ctx.inject(['systemPrompt'], …)` ouvre une fiber enfant ; si le service est absent, le plugin n'enregistre rien silencieusement au lieu de faire échouer tout le démarrage.
+- **Fournisseur de texte fail-soft** : une exception pendant l'assemblage du prompt ferait échouer **chaque** requête ; un échec de rendu renvoie donc une chaîne vide (la plateforme filtre le texte vide).
+- **Pas de `complete`** : le définir masquerait la totalité du prompt système.
+- **La déduplication est l'affaire de la plateforme** : aucun état par agent n'est conservé ; au passage de minuit, l'instantané porte simplement la nouvelle date.
+- **Cycle de vie** : l'enregistrement appartient à la fiber enfant de `ctx.inject` et est récupéré quand le plugin est désactivé.
+
+## Développement : TDD + lint
+
+```bash
+npm install          # devDependencies only (eslint / @eslint/js); zero runtime dependencies
+
+npm run tdd          # watch mode: rerun on src/ or tests/ changes (node --test --watch)
+npm test             # one full run: node --test "tests/*.test.mjs"
+node tests/format.test.mjs   # run a single file (most reliable under a sandbox: no child process)
+
+npm run lint         # eslint . (src + tests + eslint.config.mjs)
+npm run lint:fix     # auto-fix what can be fixed
+npm run verify       # lint + test; run this before committing
+```
+
+### Rouge-vert-refactorisation
+
+Les cas de test correspondent directement aux critères d'acceptation : écrire d'abord une assertion qui échoue, puis la faire passer.
+
+| Étape | Action | Commande |
+|------|--------|---------|
+| 1 rouge | Ajouter dans `tests/*.test.mjs` une assertion nommée d'après le critère d'acceptation, qui affirme un comportement que vous n'avez **pas** encore | `npm run tdd` |
+| 2 vert | Écrire dans `src/` l'implémentation minimale pour la faire passer, sans toucher aux autres assertions | `npm run tdd` |
+| 3 refactorisation | Renommer et extraire des fonctions pures en restant au vert ; `src/format.js` concentre toute la logique pure, `src/index.js` ne fait qu'enregistrer | `npm run tdd` |
+| 4 barrière | Lancer lint + la suite complète avant de committer | `npm run verify` |
+
+18 assertions aujourd'hui : `format.test.mjs` (11) couvre les fonctions pures, `context.test.mjs` (7) vérifie le contrat d'enregistrement contre un ctx factice.
+
+### Points marquants de la configuration lint
+
+- ESLint 10 en configuration plate (`eslint.config.mjs`) avec `@eslint/js` recommended comme base.
+- Règles resserrées : `eqeqeq`, `prefer-const`, `object-shorthand`, `no-unused-vars` (préfixe `_` exempté).
+- Les globales Node `crypto` / `console` / `process` sont déclarées explicitement, sinon `no-undef` produit de faux positifs.
+
+## Limitations connues
+
+- **Inactif sous les presets à prompt fixe** : si la persona d'un preset définit `includeRuntimeContext: false` (c'est le cas du `minimal` officiel et du `simple-reply` local), `assemble()` renvoie `contexts: []` et l'entrée de ce plugin est jetée en bloc. Ces presets sont conçus pour interdire aux listeners ultérieurs d'ajouter quoi que ce soit au prompt.
+- **Les anciens instantanés restent dans l'historique** : quand la date change, la plateforme ajoute un nouvel instantané (l'ancien est conservé) et le nouveau prend effet grâce à sa propre déclaration « This snapshot supersedes earlier runtime-context snapshots » — de la même manière que la plateforme gère les changements de cwd / sandbox / politique d'approbation.
+- **Les patches de bundle ne sont pas rechargés à chaud** : modifier `cordis.patch.yml` ou mettre à jour le plugin impose un redémarrage de dsh web (changer `disabled` dans le patch de profil est hot).
+- **`dsh-time-context` n'est ni chargé ni filtré** : si vous le montez explicitement dans un preset, son texte verbeux apparaît comme d'habitude. Ne pas utiliser les deux.
+- **Pas de sonde à l'exécution pour le point de contrat** : `systemPrompt.context` est appelé sans garde ; un futur renommage côté DSH se manifestera donc par un échec de chargement du plugin plutôt que par une dégradation silencieuse (voir `HANDOVER.md` §7).
+
+## Licence
+
+MIT
