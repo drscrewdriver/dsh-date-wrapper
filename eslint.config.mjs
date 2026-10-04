@@ -22,6 +22,9 @@ export default [
         crypto: 'readonly',
         console: 'readonly',
         process: 'readonly',
+        // `URL`/`setTimeout` 是 Web/Node 全局而非 ES 内建，scripts/ 用到
+        URL: 'readonly',
+        setTimeout: 'readonly',
       },
     },
     rules: {
