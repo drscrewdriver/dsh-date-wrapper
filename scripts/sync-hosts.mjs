@@ -68,6 +68,21 @@ const linesPerLang = {
   'README.ko.md': [
     `- **지원하는 DSH 호스트:** ${versionList} (0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0 라인의 ${supportedHosts.length}개 rc)`,
   ],
+  'README.fr.md': [
+    `- **Hôtes DSH pris en charge :** ${versionList} (${supportedHosts.length} rc sur les lignes 0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0)`,
+  ],
+  'README.de.md': [
+    `- **Unterstützte DSH-Hosts:** ${versionList} (${supportedHosts.length} RC über die Linien 0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0)`,
+  ],
+  'README.it.md': [
+    `- **Host DSH supportati:** ${versionList} (${supportedHosts.length} rc attraverso le linee 0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0)`,
+  ],
+  'README.ru.md': [
+    `- **Поддерживаемые хосты DSH:** ${versionList} (${supportedHosts.length} rc по линиям 0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0)`,
+  ],
+  'README.es.md': [
+    `- **Hosts DSH compatibles:** ${versionList} (${supportedHosts.length} rc en las líneas 0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0)`,
+  ],
 }
 // 矩阵跑绿清单（.compat-results/verified.json，由 scripts/test-host-compat.mjs 写出）
 const verifiedUrl = new URL('.compat-results/verified.json', ROOT)
@@ -79,6 +94,11 @@ if (existsSync(verifiedUrl)) {
     linesPerLang['README.zh.md'].push(`- **运行时已验证：** ${list}（证据见 \`.compat-results/\`）`)
     linesPerLang['README.ja.md'].push(`- **ランタイム検証済み:** ${list}（証跡は \`.compat-results/\`）`)
     linesPerLang['README.ko.md'].push(`- **런타임 검증됨:** ${list} (증적은 \`.compat-results/\`)`)
+    linesPerLang['README.fr.md'].push(`- **Vérifié à l'exécution :** ${list} — preuves dans \`.compat-results/\``)
+    linesPerLang['README.de.md'].push(`- **Zur Laufzeit verifiziert:** ${list} — Nachweise in \`.compat-results/\``)
+    linesPerLang['README.it.md'].push(`- **Verificato a runtime:** ${list} — prove in \`.compat-results/\``)
+    linesPerLang['README.ru.md'].push(`- **Проверено на этапе выполнения:** ${list} — доказательства в \`.compat-results/\``)
+    linesPerLang['README.es.md'].push(`- **Verificado en tiempo de ejecución:** ${list} — evidencia en \`.compat-results/\``)
   }
 }
 const readmeProblems = []

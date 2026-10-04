@@ -31,7 +31,7 @@
 >
 > 支持的 DSH 版本清单是**脚本下发、禁止手改**的 —— 见下方自动生成的管理块
 > （单一事实源：`scripts/hosts.mjs`；由 `scripts/sync-hosts.mjs` 下发到
-> `package.json` peerDependencies + engines.dsh、`dsh.plugin.json` 与四语 README）。
+> `package.json` peerDependencies + engines.dsh、`dsh.plugin.json` 与九语 README）。
 > 插件唯一宿主契约是 `systemPrompt.context({ name, order, text })`：不注册设置
 > 命名空间、不读会话数据、不发 RPC，宿主侧客户端／会话／持久化重写都与它无关。
 

@@ -32,7 +32,7 @@
 > The supported DSH version list is **script-managed, not hand-written** — see the
 > generated block below (single source: `scripts/hosts.mjs`; distributed by
 > `scripts/sync-hosts.mjs` to `package.json` peerDependencies + engines.dsh,
-> `dsh.plugin.json`, and this README in four languages). The plugin's single host
+> `dsh.plugin.json`, and this README in nine languages). The plugin's single host
 > contract is `systemPrompt.context({ name, order, text })`; it registers no
 > settings namespace, reads no session data and makes no RPC call, so host-side
 > client/session/persistence rewrites do not touch it.

@@ -30,6 +30,32 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - [Русский changelog](./CHANGELOG.ru.md)
 - [Español changelog](./CHANGELOG.es.md)
 
+## 0.4.0 — 2026-10-04
+
+### Changed
+
+- **Single artifact covers every DSH rc from 0.1.0 through 0.2.0 (15 rc).** The
+  per-line artifact + dist-tag model is retired: one `dsh-date-wrapper@0.4.0` now
+  declares `0.1.0-rc.2 … 0.2.0-rc.2` in `peerDependencies` (new optional peer
+  `@deepseek-ai/dsh-system-prompt`, exact enum) and `engines.dsh`, distributed to
+  package.json + `dsh.plugin.json` + nine-language READMEs by
+  `scripts/sync-hosts.mjs` from the single source `scripts/hosts.mjs`.
+- **Runtime-verified on all 15 rc** in a local isolation matrix (per-rc sandboxed
+  host install + headless boot); `publishConfig.tag` is now `latest` (the
+  `dsh-0.1.5` / `dsh-0.1.7` / `dsh-0.2.0` dist-tags also point at 0.4.0).
+- **Docs:** all nine READMEs' compatibility claims are now script-managed
+  (`<!-- host-compat:begin/end -->` blocks); the hand-written per-line tables are
+  marked historical.
+
+### Added
+
+- `scripts/hosts.mjs`, `scripts/sync-hosts.mjs` (enum → three declaration sites +
+  manifest version + nine-language README blocks), `scripts/test-host-compat.mjs`
+  (local isolation matrix runner: pinned cordis line + host-CLI-authored profile +
+  boot-shape negotiation).
+- `tests/dayroll.test.mjs` — snapshot dedupe semantics (0 events same day,
+  exactly 1 on day rollover); suite now 22 tests.
+
 ## Unreleased
 
 ### Changed
