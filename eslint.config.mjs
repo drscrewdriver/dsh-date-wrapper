@@ -12,7 +12,7 @@
 import js from '@eslint/js'
 
 export default [
-  { ignores: ['node_modules/', '*.tgz'] },
+  { ignores: ['node_modules/', '*.tgz', '.compat-results/'] },
   js.configs.recommended,
   {
     languageOptions: {
