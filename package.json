@@ -44,6 +44,7 @@
     }
   },
   "publishConfig": {
+    "registry": "https://registry.npmjs.org",
     "tag": "latest"
   },
   "peerDependencies": {
@@ -59,6 +60,8 @@
     }
   },
   "scripts": {
+    "hosts:check": "node scripts/sync-hosts.mjs",
+    "prepack": "npm run hosts:check",
     "test": "node --test \"tests/*.test.mjs\"",
     "tdd": "node --test --watch \"tests/*.test.mjs\"",
     "lint": "eslint .",
