@@ -30,6 +30,22 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - [Русский changelog](./CHANGELOG.ru.md)
 - [Español changelog](./CHANGELOG.es.md)
 
+## 0.4.1 — 2026-10-17
+
+### Changed
+
+- **Host enum extended to the 0.2.1 line: `0.2.1-rc.1` added** (16 rc across 7 lines),
+  propagated by `scripts/sync-hosts.mjs` to `peerDependencies` + `engines.dsh` +
+  `dsh.plugin.json` + nine-language README blocks. No code change: the plugin's only
+  host contract, `systemPrompt.context({ name, order, text })`, has no rc.1 breakage
+  touchpoint.
+
+### Added
+
+- `scripts:hosts:check` (sync-hosts verify mode) wired into `prepack`, so `npm pack` /
+  `npm publish` refuse to ship when any declaration site drifts from `scripts/hosts.mjs`.
+- `publishConfig.registry` pinned to `https://registry.npmjs.org`.
+
 ## 0.4.0 — 2026-10-04
 
 ### Changed
