@@ -3,7 +3,7 @@
  *
  * 迁移基线：improve-dsh-plugins/enum-peer-migration/INDEX.md §A。
  * 枚举口径（2026-10-04 用户决定，覆盖 INDEX §E「矩阵未绿不收」的起点纪律）：
- * **起步即全量收入 npm 上六条线（0.1.0/0.1.1/0.1.2/0.1.5/0.1.7/0.2.0）的全部 rc**，
+ * **起步即全量收入 npm 上七条线（0.1.0/0.1.1/0.1.2/0.1.5/0.1.7/0.2.0/0.2.1）的全部 rc**，
  * 由本地隔离矩阵逐格验证后**删红留绿**；矩阵结论落 `.compat-results/`。
  * 升级流程：本数组加版本 → `node scripts/sync-hosts.mjs --write` → 矩阵绿 → 发版。
  * 本数组与由它生成的三处声明（package.json peerDependencies / package.json
@@ -33,6 +33,8 @@ export const supportedHosts = Object.freeze([
   // 0.2.0 线（2 个 rc）
   '0.2.0-rc.1',
   '0.2.0-rc.2',
+  // 0.2.1 线（1 个 rc）
+  '0.2.1-rc.1',
 ])
 
 /** peerDependencies / engines.dsh 共用的枚举串（精确枚举无暗坑，INDEX §B）。 */

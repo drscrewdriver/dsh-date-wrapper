@@ -57,31 +57,31 @@ const END = '<!-- host-compat:end -->'
 const versionList = supportedHosts.map((v) => `\`${v}\``).join(' ')
 const linesPerLang = {
   'README.md': [
-    `- **Supported DSH hosts:** ${versionList} (${supportedHosts.length} rc releases across lines 0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0)`,
+    `- **Supported DSH hosts:** ${versionList} (${supportedHosts.length} rc releases across lines 0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0 / 0.2.1)`,
   ],
   'README.zh.md': [
-    `- **支持的 DSH 宿主：** ${versionList}（覆盖 0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0 六条线共 ${supportedHosts.length} 个 rc）`,
+    `- **支持的 DSH 宿主：** ${versionList}（覆盖 0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0 / 0.2.1 七条线共 ${supportedHosts.length} 个 rc）`,
   ],
   'README.ja.md': [
-    `- **対応する DSH ホスト:** ${versionList}（0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0 の ${supportedHosts.length} rc）`,
+    `- **対応する DSH ホスト:** ${versionList}（0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0 / 0.2.1 の ${supportedHosts.length} rc）`,
   ],
   'README.ko.md': [
-    `- **지원하는 DSH 호스트:** ${versionList} (0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0 라인의 ${supportedHosts.length}개 rc)`,
+    `- **지원하는 DSH 호스트:** ${versionList} (0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0 / 0.2.1 라인의 ${supportedHosts.length}개 rc)`,
   ],
   'README.fr.md': [
-    `- **Hôtes DSH pris en charge :** ${versionList} (${supportedHosts.length} rc sur les lignes 0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0)`,
+    `- **Hôtes DSH pris en charge :** ${versionList} (${supportedHosts.length} rc sur les lignes 0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0 / 0.2.1)`,
   ],
   'README.de.md': [
-    `- **Unterstützte DSH-Hosts:** ${versionList} (${supportedHosts.length} RC über die Linien 0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0)`,
+    `- **Unterstützte DSH-Hosts:** ${versionList} (${supportedHosts.length} RC über die Linien 0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0 / 0.2.1)`,
   ],
   'README.it.md': [
-    `- **Host DSH supportati:** ${versionList} (${supportedHosts.length} rc attraverso le linee 0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0)`,
+    `- **Host DSH supportati:** ${versionList} (${supportedHosts.length} rc attraverso le linee 0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0 / 0.2.1)`,
   ],
   'README.ru.md': [
-    `- **Поддерживаемые хосты DSH:** ${versionList} (${supportedHosts.length} rc по линиям 0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0)`,
+    `- **Поддерживаемые хосты DSH:** ${versionList} (${supportedHosts.length} rc по линиям 0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0 / 0.2.1)`,
   ],
   'README.es.md': [
-    `- **Hosts DSH compatibles:** ${versionList} (${supportedHosts.length} rc en las líneas 0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0)`,
+    `- **Hosts DSH compatibles:** ${versionList} (${supportedHosts.length} rc en las líneas 0.1.0 / 0.1.1 / 0.1.2 / 0.1.5 / 0.1.7 / 0.2.0 / 0.2.1)`,
   ],
 }
 // 矩阵跑绿清单（.compat-results/verified.json，由 scripts/test-host-compat.mjs 写出）
