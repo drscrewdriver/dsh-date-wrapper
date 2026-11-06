@@ -39,8 +39,15 @@ export const supportedHosts = Object.freeze([
   '0.2.2-rc.1',
 ])
 
-/** peerDependencies / engines.dsh 共用的枚举串（精确枚举无暗坑，INDEX §B）。 */
+/** peerDependencies 共用的枚举串（精确枚举无暗坑，INDEX §B）。 */
 export const peerRange = supportedHosts.join(' || ')
+
+/**
+ * engines.dsh 声明面（2026-11-06 起改 range 声明，对齐 dsh-arrowkey-nav a6fb783 迁移）：
+ * package.json / dsh.plugin.json 的 engines.dsh 发这一串；supportedHosts 枚举
+ * 继续供 peer 下发与 README 宿主清单展示。
+ */
+export const enginesRange = '>=0.1.1-rc.2 <0.3.0'
 
 /** 本地开发与矩阵默认宿主（devDependencies 若引入宿主包一律钉这里）。 */
 export const developmentHost = '0.2.1-rc.5'
